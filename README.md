@@ -11,8 +11,10 @@ SIPSIKO adalah aplikasi web berbasis **Next.js** dan **Supabase** untuk membantu
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+[![Website](https://img.shields.io/badge/Website-Live-146B58?logo=googlechrome&logoColor=white)](https://mental.rkulu.my.id)
+[![GitHub](https://img.shields.io/badge/Source-GitHub-181717?logo=github&logoColor=white)](https://github.com/ridwan-kulu/sipsiko)
 
-[Demo](#-deployment-ke-vercel) · [Instalasi](#-instalasi) · [Konfigurasi](#%EF%B8%8F-konfigurasi-supabase) · [Testing](#-testing)
+[🌐 Demo](https://mental.rkulu.my.id) · [🚀 Instalasi](#-instalasi) · [⚙️ Konfigurasi](#%EF%B8%8F-konfigurasi-supabase) · [🧪 Testing](#-testing) · [☁️ Deploy](#%EF%B8%8F-deployment-ke-vercel)
 
 </div>
 
@@ -20,6 +22,22 @@ SIPSIKO adalah aplikasi web berbasis **Next.js** dan **Supabase** untuk membantu
 
 > [!IMPORTANT]
 > SIPSIKO merupakan **alat skrining awal dan pendukung keputusan**, bukan alat diagnosis medis. Hasil aplikasi tidak menggantikan pemeriksaan oleh psikolog, psikiater, dokter, atau tenaga kesehatan lainnya. Basis pengetahuan, pertanyaan, aturan, bobot, rekomendasi, dan alur krisis wajib ditinjau tenaga kesehatan sebelum digunakan oleh publik.
+
+## 🌐 Live Production
+
+Aplikasi dapat diakses melalui:
+
+### [mental.rkulu.my.id](https://mental.rkulu.my.id)
+
+| Layanan | URL |
+|---|---|
+| Aplikasi | `https://mental.rkulu.my.id` |
+| Callback autentikasi | `https://mental.rkulu.my.id/auth/callback` |
+| Health check | `https://mental.rkulu.my.id/api/health` |
+| Repository | `https://github.com/ridwan-kulu/sipsiko` |
+
+> [!NOTE]
+> Deployment production tidak berarti aplikasi telah memperoleh validasi klinis. Gunakan data dan aturan hanya untuk pengembangan sampai basis pengetahuan selesai ditinjau tenaga kesehatan.
 
 ## ✨ Fitur Utama
 
@@ -263,6 +281,13 @@ Site URL     : http://localhost:3000
 Redirect URL : http://localhost:3000/auth/callback
 ```
 
+Untuk production:
+
+```text
+Site URL     : https://mental.rkulu.my.id
+Redirect URL : https://mental.rkulu.my.id/auth/callback
+```
+
 ### 5. Jadikan akun sebagai admin
 
 Daftarkan akun melalui aplikasi, lalu jalankan SQL berikut. Ganti email dengan email admin:
@@ -364,10 +389,16 @@ Pada Debian atau Ubuntu:
 npx playwright install --with-deps chromium
 ```
 
-Jalankan E2E:
+Jalankan E2E terhadap server lokal:
 
 ```bash
 npm run test:e2e
+```
+
+Jalankan E2E terhadap production:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://mental.rkulu.my.id npm run test:e2e
 ```
 
 Buka laporan:
@@ -375,6 +406,9 @@ Buka laporan:
 ```bash
 npx playwright show-report
 ```
+
+> [!NOTE]
+> Browser Playwright tidak didukung resmi pada sebagian lingkungan Android/ARM64. Jika Chromium gagal dijalankan secara lokal, jalankan E2E melalui GitHub Actions pada runner Ubuntu.
 
 ### Quality gate
 
@@ -445,7 +479,7 @@ Tambahkan:
 NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_ID.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
-NEXT_PUBLIC_SITE_URL=https://NAMA-PROJECT.vercel.app
+NEXT_PUBLIC_SITE_URL=https://mental.rkulu.my.id
 ```
 
 Terapkan untuk Production, Preview, dan Development sesuai kebutuhan. Lakukan redeploy setelah mengubah environment variables.
@@ -454,17 +488,17 @@ Terapkan untuk Production, Preview, dan Development sesuai kebutuhan. Lakukan re
 
 ```text
 Site URL:
-https://NAMA-PROJECT.vercel.app
+https://mental.rkulu.my.id
 
 Redirect URLs:
-https://NAMA-PROJECT.vercel.app/auth/callback
+https://mental.rkulu.my.id/auth/callback
 http://localhost:3000/auth/callback
 ```
 
-Jika menggunakan custom domain, tambahkan:
+Domain bawaan Vercel dapat dipertahankan sebagai fallback:
 
 ```text
-https://domain-anda.com/auth/callback
+https://NAMA-PROJECT.vercel.app/auth/callback
 ```
 
 ## 🔐 Keamanan dan Privasi
@@ -503,7 +537,10 @@ Sebelum digunakan publik, lakukan:
 - [x] Dashboard admin/pakar.
 - [x] CRUD kondisi, gejala, dan aturan.
 - [x] Audit log.
-- [x] Unit, component, dan E2E test.
+- [x] Unit dan component test.
+- [x] Deployment production di `mental.rkulu.my.id`.
+- [ ] E2E test terotomasi di GitHub Actions.
+- [ ] Custom SMTP untuk email autentikasi production.
 - [ ] Validasi klinis formal.
 - [ ] Versioning basis pengetahuan.
 - [ ] Rate limiting terdistribusi.
