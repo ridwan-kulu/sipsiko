@@ -1,36 +1,101 @@
-import { z } from "zod";
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+import { ruleSchema } from "./rule-schema";
 
-export const ruleSchema = z.object({
-  id: z
-    .string()
-    .uuid("ID aturan tidak valid.")
-    .optional(),
+const validRule = {
+  conditionId:
+    "11111111-1111-4111-8111-111111111111",
 
-  conditionId: z
-    .string()
-    .uuid("Kondisi tidak valid."),
+  symptomId:
+    "22222222-2222-4222-8222-222222222222",
 
-  symptomId: z
-    .string()
-    .uuid("Gejala tidak valid."),
+  expertWeight: 0.8,
+  isRequired: true,
+  minimumDurationDays: 14,
+};
 
-  expertWeight: z
-    .number()
-    .finite("Bobot harus berupa angka.")
-    .min(0.01, "Bobot minimal 0.01.")
-    .max(1, "Bobot maksimal 1."),
+describe("ruleSchema", () => {
+  it("menerima aturan yang valid", () => {
+    const result =
+      ruleSchema.safeParse(validRule);
 
-  isRequired: z.boolean(),
+    expect(result.success).toBe(true);
+  });
 
-  minimumDurationDays: z
-    .number()
-    .finite()
-    .int("Durasi harus berupa bilangan bulat.")
-    .min(0, "Durasi tidak boleh negatif.")
-    .max(3650, "Durasi terlalu besar.")
-    .nullable(),
+  it("menerima ID aturan yang valid", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+
+      id:
+        "33333333-3333-4333-8333-333333333333",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("menolak conditionId yang bukan UUID", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      conditionId: "condition-invalid",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("menolak symptomId yang bukan UUID", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      symptomId: "symptom-invalid",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("menolak bobot nol", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      expertWeight: 0,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("menolak bobot di atas satu", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      expertWeight: 1.1,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("menerima durasi null", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      minimumDurationDays: null,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("menolak durasi negatif", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      minimumDurationDays: -1,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("menolak durasi desimal", () => {
+    const result = ruleSchema.safeParse({
+      ...validRule,
+      minimumDurationDays: 14.5,
+    });
+
+    expect(result.success).toBe(false);
+  });
 });
-
-export type RuleInput = z.infer<
-  typeof ruleSchema
->;
