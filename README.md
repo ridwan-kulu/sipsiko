@@ -1,36 +1,588 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# 🧠 SIPSIKO
 
-First, run the development server:
+### Sistem Pakar Skrining Awal Kesehatan Mental Berbasis Web
+
+SIPSIKO adalah aplikasi web berbasis **Next.js** dan **Supabase** untuk membantu pengguna mengenali indikasi awal gangguan kesehatan mental melalui basis pengetahuan pakar dan metode **Certainty Factor**.
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+[![Website](https://img.shields.io/badge/Website-Live-146B58?logo=googlechrome&logoColor=white)](https://mental.rkulu.my.id)
+[![GitHub](https://img.shields.io/badge/Source-GitHub-181717?logo=github&logoColor=white)](https://github.com/ridwan-kulu/sipsiko)
+
+[🌐 Demo](https://mental.rkulu.my.id) · [🚀 Instalasi](#-instalasi) · [⚙️ Konfigurasi](#%EF%B8%8F-konfigurasi-supabase) · [🧪 Testing](#-testing) · [☁️ Deploy](#%EF%B8%8F-deployment-ke-vercel)
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> SIPSIKO merupakan **alat skrining awal dan pendukung keputusan**, bukan alat diagnosis medis. Hasil aplikasi tidak menggantikan pemeriksaan oleh psikolog, psikiater, dokter, atau tenaga kesehatan lainnya. Basis pengetahuan, pertanyaan, aturan, bobot, rekomendasi, dan alur krisis wajib ditinjau tenaga kesehatan sebelum digunakan oleh publik.
+
+## 🌐 Live Production
+
+Aplikasi dapat diakses melalui:
+
+### [mental.rkulu.my.id](https://mental.rkulu.my.id)
+
+| Layanan | URL |
+|---|---|
+| Aplikasi | `https://mental.rkulu.my.id` |
+| Callback autentikasi | `https://mental.rkulu.my.id/auth/callback` |
+| Health check | `https://mental.rkulu.my.id/api/health` |
+| Repository | `https://github.com/ridwan-kulu/sipsiko` |
+
+> [!NOTE]
+> Deployment production tidak berarti aplikasi telah memperoleh validasi klinis. Gunakan data dan aturan hanya untuk pengembangan sampai basis pengetahuan selesai ditinjau tenaga kesehatan.
+
+## ✨ Fitur Utama
+
+### Untuk pengguna
+
+- Skrining awal tanpa akun.
+- Persetujuan penggunaan sebelum memulai.
+- Pertanyaan gejala yang diambil secara dinamis dari Supabase.
+- Jawaban bertingkat untuk menggambarkan frekuensi atau keyakinan pengguna.
+- Perhitungan tingkat kecocokan menggunakan metode Certainty Factor.
+- Hasil yang dapat dijelaskan melalui daftar faktor pendukung.
+- Alur keselamatan khusus ketika terdeteksi jawaban berisiko.
+- Registrasi, login, logout, dan konfirmasi email.
+- Penyimpanan serta riwayat hasil skrining bagi pengguna yang login.
+- Tampilan responsif untuk desktop dan perangkat seluler.
+
+### Untuk pakar dan admin
+
+- Dashboard basis pengetahuan.
+- CRUD kondisi atau indikasi gangguan.
+- CRUD gejala dan pertanyaan skrining.
+- Pengaturan gejala keselamatan atau krisis.
+- CRUD aturan kondisi–gejala.
+- Pengaturan bobot pakar antara `0.01` sampai `1.00`.
+- Pengaturan gejala wajib dan durasi minimal.
+- Audit log perubahan basis pengetahuan.
+- Role-based access control untuk `user`, `expert`, dan `admin`.
+
+## 🧮 Metode Certainty Factor
+
+Setiap hubungan antara kondisi dan gejala memiliki bobot dari pakar. Jawaban pengguna dikalikan dengan bobot tersebut:
+
+```text
+CF Gejala = CF Pakar × CF Pengguna
+```
+
+Beberapa nilai positif kemudian digabungkan:
+
+```text
+CF Gabungan = CF Lama + CF Baru × (1 - CF Lama)
+```
+
+Contoh:
+
+```text
+Gejala A = 0.80 × 0.75 = 0.60
+Gejala B = 0.70 × 1.00 = 0.70
+
+CF Gabungan = 0.60 + 0.70 × (1 - 0.60)
+            = 0.88 atau 88%
+```
+
+Persentase yang ditampilkan adalah **tingkat kecocokan sistem**, bukan probabilitas klinis atau kepastian diagnosis.
+
+## 🛠️ Teknologi yang Digunakan
+
+| Bagian | Teknologi |
+|---|---|
+| Framework | Next.js 16 dengan App Router dan Turbopack |
+| UI | React 19, Tailwind CSS, Lucide React |
+| Bahasa | TypeScript |
+| Database | Supabase PostgreSQL |
+| Authentication | Supabase Auth |
+| Authorization | Supabase Row Level Security dan role pengguna |
+| Validasi | Zod |
+| Unit & component test | Vitest, Testing Library, jsdom |
+| End-to-end test | Playwright |
+| Deployment | Vercel |
+
+## 🏗️ Arsitektur Singkat
+
+```text
+Browser
+  │
+  ├── Landing, consent, pertanyaan, hasil
+  ├── Login, registrasi, dashboard pengguna
+  └── Dashboard admin/pakar
+  │
+Next.js App Router
+  │
+  ├── Server Components
+  ├── Server Actions
+  ├── Route Handlers
+  └── Mesin inferensi Certainty Factor
+  │
+Supabase
+  ├── PostgreSQL
+  ├── Authentication
+  ├── Row Level Security
+  └── Audit log
+```
+
+## 📁 Struktur Project
+
+```text
+sipsiko/
+├── app/
+│   ├── admin/
+│   │   ├── aturan/
+│   │   ├── audit/
+│   │   ├── gejala/
+│   │   └── kondisi/
+│   ├── api/
+│   │   ├── health/
+│   │   └── inference/
+│   ├── auth/
+│   ├── dashboard/
+│   ├── daftar/
+│   ├── masuk/
+│   └── skrining/
+│       ├── hasil/
+│       ├── persetujuan/
+│       └── pertanyaan/
+├── components/
+│   └── screening/
+├── features/
+│   ├── admin/
+│   ├── inference/
+│   └── screening/
+├── lib/
+│   ├── auth/
+│   └── supabase/
+├── supabase/
+│   └── migrations/
+├── e2e/
+├── test/
+├── proxy.ts
+├── next.config.ts
+├── playwright.config.ts
+└── vitest.config.ts
+```
+
+## ✅ Prasyarat
+
+Pastikan perangkat sudah memiliki:
+
+- Node.js 20 atau lebih baru.
+- npm 10 atau lebih baru.
+- Akun [Supabase](https://supabase.com/).
+- Akun [GitHub](https://github.com/).
+- Akun [Vercel](https://vercel.com/) untuk deployment.
+
+Periksa versi:
+
+```bash
+node --version
+npm --version
+```
+
+## 🚀 Instalasi
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/ridwan-kulu/sipsiko.git
+cd sipsiko
+```
+
+### 2. Instal dependency
+
+```bash
+npm install
+```
+
+### 3. Buat environment file
+
+```bash
+cp .env.example .env.local
+```
+
+Jika `.env.example` belum tersedia, buat `.env.local`:
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+```
+
+> [!CAUTION]
+> `SUPABASE_SERVICE_ROLE_KEY` hanya boleh digunakan di server. Jangan menambahkan prefix `NEXT_PUBLIC_`, jangan commit `.env.local`, dan jangan menampilkan nilainya di browser atau log.
+
+## ⚙️ Konfigurasi Supabase
+
+### 1. Buat project
+
+1. Masuk ke [Supabase Dashboard](https://supabase.com/dashboard).
+2. Pilih **New project**.
+3. Isi nama project dan password database.
+4. Pilih region terdekat.
+5. Tunggu proses provisioning selesai.
+
+### 2. Ambil API credentials
+
+Buka:
+
+```text
+Project Settings → API
+```
+
+Salin Project URL, anon/publishable key, dan service-role key ke `.env.local`.
+
+### 3. Jalankan migration
+
+Jalankan seluruh file SQL dalam folder berikut secara berurutan melalui Supabase SQL Editor:
+
+```text
+supabase/migrations/
+├── 001_initial_schema.sql
+├── 002_seed_knowledge_base.sql
+├── 003_staff_access.sql
+├── 004_staff_read_access.sql
+└── 005_production_security.sql
+```
+
+Migration membuat tabel utama:
+
+```text
+profiles
+conditions
+symptoms
+rules
+consultations
+answers
+results
+audit_logs
+```
+
+### 4. Atur Authentication URL
+
+Buka:
+
+```text
+Supabase → Authentication → URL Configuration
+```
+
+Untuk development:
+
+```text
+Site URL     : http://localhost:3000
+Redirect URL : http://localhost:3000/auth/callback
+```
+
+Untuk production:
+
+```text
+Site URL     : https://mental.rkulu.my.id
+Redirect URL : https://mental.rkulu.my.id/auth/callback
+```
+
+### 5. Jadikan akun sebagai admin
+
+Daftarkan akun melalui aplikasi, lalu jalankan SQL berikut. Ganti email dengan email admin:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = (
+  select id
+  from auth.users
+  where email = 'EMAIL_ADMIN'
+);
+```
+
+Periksa role:
+
+```sql
+select
+  auth.users.email,
+  profiles.full_name,
+  profiles.role
+from auth.users
+join public.profiles
+  on profiles.id = auth.users.id;
+```
+
+## ▶️ Menjalankan Aplikasi
+
+Development server biasa:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Jika environment membatasi deteksi network interface:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:e2e
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Buka:
 
-## Learn More
+```text
+http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+Endpoint pemeriksaan database:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+http://localhost:3000/api/health
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Respons yang diharapkan:
 
-## Deploy on Vercel
+```json
+{
+  "status": "ok",
+  "database": "connected"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧪 Testing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Unit dan component test
+
+```bash
+npm test
+```
+
+Watch mode:
+
+```bash
+npm run test:watch
+```
+
+Coverage:
+
+```bash
+npm run test:coverage
+```
+
+Laporan HTML tersedia di:
+
+```text
+coverage/index.html
+```
+
+### End-to-end test
+
+Instal browser Playwright:
+
+```bash
+npx playwright install chromium
+```
+
+Pada Debian atau Ubuntu:
+
+```bash
+npx playwright install --with-deps chromium
+```
+
+Jalankan E2E terhadap server lokal:
+
+```bash
+npm run test:e2e
+```
+
+Jalankan E2E terhadap production:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://mental.rkulu.my.id npm run test:e2e
+```
+
+Buka laporan:
+
+```bash
+npx playwright show-report
+```
+
+> [!NOTE]
+> Browser Playwright tidak didukung resmi pada sebagian lingkungan Android/ARM64. Jika Chromium gagal dijalankan secara lokal, jalankan E2E melalui GitHub Actions pada runner Ubuntu.
+
+### Quality gate
+
+```bash
+npm run lint
+npm test
+npm run build
+npm run test:e2e
+```
+
+Atau jika script `check` tersedia:
+
+```bash
+npm run check
+```
+
+## 📦 Production Build
+
+Buat build produksi:
+
+```bash
+npm run build
+```
+
+Jalankan secara lokal:
+
+```bash
+npm run start
+```
+
+Buka:
+
+```text
+http://localhost:3000
+```
+
+## ☁️ Deployment ke Vercel
+
+### 1. Push ke GitHub
+
+```bash
+git add .
+git commit -m "Prepare production deployment"
+git branch -M main
+git push -u origin main
+```
+
+### 2. Import ke Vercel
+
+1. Buka [Vercel](https://vercel.com/).
+2. Pilih **Add New → Project**.
+3. Import repository `ridwan-kulu/sipsiko`.
+4. Pastikan framework terdeteksi sebagai Next.js.
+5. Gunakan `npm run build` sebagai Build Command.
+6. Klik **Deploy**.
+
+### 3. Tambahkan environment variables
+
+Buka:
+
+```text
+Vercel → Project → Settings → Environment Variables
+```
+
+Tambahkan:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_SITE_URL=https://mental.rkulu.my.id
+```
+
+Terapkan untuk Production, Preview, dan Development sesuai kebutuhan. Lakukan redeploy setelah mengubah environment variables.
+
+### 4. Perbarui URL Supabase Auth
+
+```text
+Site URL:
+https://mental.rkulu.my.id
+
+Redirect URLs:
+https://mental.rkulu.my.id/auth/callback
+http://localhost:3000/auth/callback
+```
+
+Domain bawaan Vercel dapat dipertahankan sebagai fallback:
+
+```text
+https://NAMA-PROJECT.vercel.app/auth/callback
+```
+
+## 🔐 Keamanan dan Privasi
+
+- Row Level Security harus aktif pada seluruh tabel sensitif.
+- Pengguna hanya dapat membaca konsultasi dan hasil milik sendiri.
+- Bobot pakar hanya dibaca oleh kode server.
+- Service-role key tidak boleh masuk ke browser atau Git.
+- Endpoint inferensi menggunakan `Cache-Control: no-store`.
+- Jangan mencatat jawaban pengguna ke application log.
+- Batasi ukuran request dan validasi seluruh input di server.
+- Audit setiap perubahan kondisi, gejala, dan aturan.
+- Gunakan HTTPS pada production.
+- Terapkan kebijakan retensi dan penghapusan data.
+- Tinjau regulasi perlindungan data yang berlaku di wilayah operasional.
+
+## 🧑‍⚕️ Validasi Klinis
+
+Sebelum digunakan publik, lakukan:
+
+1. Review pertanyaan oleh psikolog atau psikiater.
+2. Review kondisi, gejala, aturan, dan bobot pakar.
+3. Uji kasus bersama tenaga kesehatan.
+4. Evaluasi false positive dan false negative.
+5. Review bahasa agar tidak menstigma pengguna.
+6. Review alur keselamatan dan kontak bantuan darurat.
+7. Dokumentasikan versi basis pengetahuan yang digunakan.
+
+## 🗺️ Roadmap
+
+- [x] Landing page dan persetujuan.
+- [x] Pertanyaan skrining dinamis.
+- [x] Mesin inferensi Certainty Factor.
+- [x] Hasil dengan faktor pendukung.
+- [x] Supabase Auth dan riwayat pengguna.
+- [x] Dashboard admin/pakar.
+- [x] CRUD kondisi, gejala, dan aturan.
+- [x] Audit log.
+- [x] Unit dan component test.
+- [x] Deployment production di `mental.rkulu.my.id`.
+- [ ] E2E test terotomasi di GitHub Actions.
+- [ ] Custom SMTP untuk email autentikasi production.
+- [ ] Validasi klinis formal.
+- [ ] Versioning basis pengetahuan.
+- [ ] Rate limiting terdistribusi.
+- [ ] Ekspor laporan pengguna.
+- [ ] Observability dan alerting produksi.
+- [ ] Audit keamanan independen.
+
+## 🤝 Kontribusi
+
+1. Fork repository.
+2. Buat branch fitur:
+
+   ```bash
+   git checkout -b feature/nama-fitur
+   ```
+
+3. Commit perubahan:
+
+   ```bash
+   git commit -m "Add nama fitur"
+   ```
+
+4. Push branch:
+
+   ```bash
+   git push origin feature/nama-fitur
+   ```
+
+5. Buka Pull Request.
+
+Pastikan lint, test, dan build berhasil sebelum membuat Pull Request.
+
+## ⚠️ Disclaimer
+
+SIPSIKO tidak memberikan diagnosis, resep, atau keputusan medis. Dalam kondisi darurat atau jika terdapat risiko menyakiti diri sendiri maupun orang lain, segera hubungi layanan darurat setempat, tenaga kesehatan, atau orang yang dipercaya.
+
+---
+
+<div align="center">
+
+Dibangun dengan Next.js, TypeScript, Supabase, dan perhatian terhadap keselamatan pengguna.
+
+**SIPSIKO — pahami indikasi, tentukan langkah berikutnya.**
+
+</div>
